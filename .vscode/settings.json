@@ -1,7 +1,7 @@
 {  
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
-    "source.fixAll.stylelint": true
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
   },
   "[html,javascript,json,xml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -20,5 +20,6 @@
   "eslint.validate": ["javascript", "html", "vue", "json", "javascriptreact", "typescript", "typescriptreact"],
   "eslint.options": {
     "extensions": [".html", ".js", ".vue", ".jsx", "json", ".tsx"]
-  }
+  },
+  "indentRainbow.lightIndicatorStyleLineWidth": 1,
 }
