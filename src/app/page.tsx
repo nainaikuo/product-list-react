@@ -29,6 +29,8 @@ type Search = {
   priceMax: number | undefined;
   categories: string[];
   inStock: boolean | undefined;
+  total: number;
+  page: number;
 };
 
 type FormError = Partial<Record<keyof Search, string>>;
@@ -65,12 +67,14 @@ const productCategories: Option[] = [
   { value: 'E', label: '類別E' },
 ];
 
-const initSearchData = {
+const initSearchData: Search = {
   keyword: '',
   priceMin: undefined,
   priceMax: undefined,
   categories: [],
   inStock: undefined,
+  total: 0,
+  page: 1,
 };
 
 export default function Home() {
@@ -79,15 +83,11 @@ export default function Home() {
   const [searchData, setSearchData] = useState<Search>(initSearchData);
   const [searchProductDataNum, setSearchProductDataNum] = useState<number>(0);
   const [productData, setProductData] = useState<Product[]>([]);
+  const [pageCount, setPageCount] = useState<number>(0);
 
   const [sortData, setSortData] = useState<{ id: string | null; state: 'ASC' | 'DESC' | null }>({
     id: null,
     state: null,
-  });
-
-  const [paginationData, setPaginationData] = useState<{ page: number; pageCount: number }>({
-    page: 1,
-    pageCount: 0,
   });
 
   const formDataHandler = (data: Search) => {
@@ -105,12 +105,11 @@ export default function Home() {
   };
 
   const searchPageHandler = (page: number) => {
-    setPaginationData((prev) => ({ ...prev, page }));
+    setSearchData((prev) => ({ ...prev, page }));
   };
 
   const setFormDataToSearchData = () => {
-    setPaginationData((prev) => ({ ...prev, page: 1 }));
-    setSearchData(formData);
+    setSearchData((prev) => ({ ...prev, ...formData, page: 1 }));
   };
 
   const resetSearchDataHandler = () => {
@@ -150,12 +149,11 @@ export default function Home() {
   };
 
   const search = () => {
-    const { keyword, priceMin, priceMax, categories, inStock } = searchData;
+    const { keyword, priceMin, priceMax, categories, inStock, page } = searchData;
 
     const hasPriceError = priceErrorHandler(priceMin, priceMax);
     if (hasPriceError) return;
 
-    const page = paginationData.page;
     const pageSize = 10;
 
     const filteredData = productRawData.filter((product) => {
@@ -168,7 +166,8 @@ export default function Home() {
     });
 
     setSearchProductDataNum(filteredData.length);
-    setPaginationData((prev) => ({ ...prev, pageCount: Math.ceil(filteredData.length / pageSize) }));
+
+    setPageCount(Math.ceil(filteredData.length / pageSize));
 
     const paginatedData = filteredData.slice(pageSize * (page - 1), pageSize * page);
 
@@ -197,7 +196,7 @@ export default function Home() {
   // 頁碼及 searchData 變動時搜尋
   useEffect(() => {
     search();
-  }, [paginationData.page, searchData]);
+  }, [searchData]);
 
   return (
     <div className="px-4 md:px-8 lg:px-10">
@@ -369,7 +368,8 @@ export default function Home() {
                   nextLabel=">"
                   onPageChange={(e) => searchPageHandler(e.selected + 1)}
                   pageRangeDisplayed={3}
-                  pageCount={paginationData.pageCount}
+                  forcePage={searchData.page - 1}
+                  pageCount={pageCount}
                   previousLabel="<"
                   renderOnZeroPageCount={null}
                 />
